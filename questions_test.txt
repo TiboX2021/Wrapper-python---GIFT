@@ -1,0 +1,20 @@
+// question: 0  name: Switch category to $course$/top/Défaut pour Test Thibaut
+$CATEGORY: $course$/top/Défaut pour Test Thibaut
+
+
+// question: 31354  name: question test feedback
+::question test feedback::[html]<p>ceci est le texte de la question<br></p>{
+	=%100%oui#
+	####<p>ceci est le feedback général de la question<br></p>
+}
+
+
+// question: 31355  name: réponse courte template
+::réponse courte template::[html]<p>texte de la question<br></p>{
+	=%100%réponse correcte 1 (note de 100%)#<p>feedback spécifique pour la réponse 1<br></p>
+	=%50%réponse correcte 2 (note de 50%)#feedback spécifique pour la réponse 2<br>
+	=%0%*#<p>feedback pour une mauvaise réponse<br></p>
+	####<p>feedback général<br></p>
+}
+
+
