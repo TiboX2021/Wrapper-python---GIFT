@@ -316,13 +316,66 @@ class ConversionNqKm:
 
 	def generer() -> list[pg.Question]:
 
-		questions = []
+		liste_questions = []
 
 		# Listes de nombres
 		nqToKm = list(range(5, 105, 5))
 		kmToNq = list(range(20, 400, 20))
 
+		titre = "Conversion nautique - kilomètre"
+
 		# Génération des questions
+		for conversion in nqToKm:
+
+			resultat = round(conversion * 2 * 0.9, 3)  # Round pour éviter les approximations à 0.9999999
+
+
+
+			# Création des réponses possibles
+			bonne_reponse = pg.Answer(percent="100", answer=numberToStr(resultat), feedback=None)
+
+			feedback_erreur = (
+				"Conversion de nautiques en kilomètres : multiplier par 2, puis enlever 10%. "
+				"Pour obtenir les 10% à soustraire, il suffit de multiplier le nombre par 10/100, "
+				"ce qui revient à le divier par 10"
+			)
+			mauvaise_reponse = pg.ShortAnswerQuestion.defaultAnswer(feedback_erreur)
+
+			# Création de la question
+			question = pg.ShortAnswerQuestion(id=0, title=titre,
+				text=f"Convertir {conversion} nautiques (nq) en kilomètres (km)",
+				answers=[bonne_reponse, mauvaise_reponse])
+
+			# Ajout de la question :
+			liste_questions.append(question)
+
+		# Idem pour la conversion dans l'autre sens
+		for conversion in nqToKm:
+
+			resultat = round(conversion / 2 * 1.1, 3)  # Round pour éviter les approximations à 0.9999999
+
+
+
+			# Création des réponses possibles
+			bonne_reponse = pg.Answer(percent="100", answer=numberToStr(resultat), feedback="")
+
+			feedback_erreur = (
+				"Conversion de kilomètres en nautiques : diviser par 2, puis ajouter 10%. "
+				"Pour obtenir les 10% à ajouter, il suffit de multiplier le nombre par 10/100, "
+				"ce qui revient à le divier par 10"
+			)
+			mauvaise_reponse = pg.ShortAnswerQuestion.defaultAnswer(feedback_erreur)
+
+			# Création de la question
+			question = pg.ShortAnswerQuestion(id=0, title=titre,
+				text=f"Convertir {conversion} kilomètres (km) en nautiques (nq)",
+				answers=[bonne_reponse, mauvaise_reponse])
+
+			# Ajout de la question :
+			liste_questions.append(question)
+
+		return liste_questions
+
 
 
 if __name__ == "__main__":
@@ -331,12 +384,14 @@ if __name__ == "__main__":
 	# Création de la banque de questions
 	groupe = pg.QuestionGroup()
 
-	groupe.path = pg.Path(pg.Parameters.test_category + "Additions astucieuses niveau 0.txt")
+	filename = "Conversions km - nautiques.txt"
 
-	groupe.questions = AdditionAstucieuse.generer(paires=1, intrus=True)
+	groupe.path = pg.Path(pg.Parameters.test_category + filename)
+
+	groupe.questions = ConversionNqKm.generer()
 
 	parser = pg.Parser()
 
 	parser.addQuestionGroup(groupe)
 
-	parser.write(filepath=pg.Parameters.banque_test + "Additions astucieuses niveau 0.txt")
+	parser.write(filepath=pg.Parameters.banque_test + filename)
