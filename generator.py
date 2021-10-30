@@ -313,7 +313,7 @@ class ConversionNqKm:
 
 	20 questions de chaque -> 40 questions en tout, pas mal
 	"""
-
+	@staticmethod
 	def generer() -> list[pg.Question]:
 
 		liste_questions = []
@@ -377,6 +377,120 @@ class ConversionNqKm:
 		return liste_questions
 
 
+# Les 2 classes suivantes donnent des questions qui doivent se suivre dans un test
+class ProportionnaliteFuseDecalage:
+	"""
+	Questions de proportionnalité :
+	ex:  les clics avec le décalage
+	-> 1 clic = 6 cm de correction à 200. Ca fait combien à 400 m?
+	(donner le feedback mauvaise réponse en expliquant que c'est un angle)
+	-> on a un décalage de 12 cm à 400m. Sachant qu'un clic..., combien de clics doit-on faire?
+
+	sur d'autres thèmes?
+
+	conversions d'unités? voir le cours des mousses
+	"""
+	@staticmethod
+	def generer() -> list[pg.Question]:
+		"""
+		1er type de question :
+		1 clic : 6 cm à 200 m
+		pour d'autres distances, on peut de prendre 50, 100, 300, 400, 600, 800, 1000
+		"""
+		distances_clics = [50, 100, 300, 400, 600, 800, 1000]
+
+		liste_questions = []
+
+		# Génération des questions sur le décalage:
+		titre = "Effet d'un clic de FAMAS à une distance donnée pour corriger le tir"
+		for distance in distances_clics:
+
+			resultat = round(distance * 6 / 200, 4)
+
+			texte = (
+				"Un clic sur le bouton de réglage du FAMAS permet de décaler le tir de 6 cm pour une cible à 200m. "
+				f"De combien de cm le tir est-il décalé pour une cible à {distance}m?"
+			)
+
+			# Création des réponses possibles
+			bonne_reponse = pg.Answer(percent="100", answer=numberToStr(resultat), feedback="")
+
+			feedback_erreur = (
+				"Un clic fait bouger le canon de l'arme d'un certain angle."
+				"Cet angle décrit une distance de 6cm si on se place à 200m de l'arme, "
+				"Il y a donc proportionnalité entre la distance de tir et la correction en cm équivalente "
+				"à un clic"
+			)
+			mauvaise_reponse = pg.ShortAnswerQuestion.defaultAnswer(feedback_erreur)
+
+			# Création de la question
+			question = pg.ShortAnswerQuestion(id=0, title=titre,
+				text=texte,
+				answers=[bonne_reponse, mauvaise_reponse])
+
+			# Ajout de la question :
+			liste_questions.append(question)
+
+
+
+		return liste_questions	
+
+
+class ProportionnaliteFuseCorrection:
+
+	@staticmethod
+	def generer() -> list[pg.Question]:
+		"""
+		2ème type de questions:
+		on a x décalage à 100, 300, 400, 600, 800, 1000m : combien de clics?
+		Ici, attention à bien générer le décalage pour que le calcul ne soit pas trop compliqué
+		il faut que ça donne un multiple de 6cm à 200m
+		-> tous les générer pour que ça donne 1, 2 ou 3 clics
+		"""
+
+		distances_decalages = [100, 300, 400, 600, 800, 1000]
+		clics_necessaires = [1, 2, 3]
+
+		liste_questions = []
+
+		# Clics nécessaires
+		titre = "Nombre de clics nécessaires pour corriger tir FAMAS"
+		decalage_cm = 6
+
+		for distance in distances_decalages:
+
+			for nombre_clic in clics_necessaires:
+
+				decalage = round(decalage_cm * nombre_clic * distance / 200, 4)
+
+				texte = (
+					"Un clic sur le bouton de réglage du FAMAS permet de décaler le tir de 6 cm pour une cible à 200m. "
+					f"En tirant à {distance}m, on remarque un écart de {numberToStr(decalage)}cm par rapport au centre "
+					"de la cible. "
+					"Combien de clics doit-on faire pour régler l'arme?"
+				)
+
+				# Création des réponses possibles
+				bonne_reponse = pg.Answer(percent="100", answer=numberToStr(nombre_clic), feedback=None)
+
+				feedback_erreur = (
+					"Si un clic permet de décaler le tir d'un FAMAS de 6 cm lorsqu'on tire à 200m, "
+					"il n'aura pas le même effet à 50m ou 400m. Plus la cible est éloignée, plus la balle "
+					"a le temps de s'écarter du chemin qui mène au centre de la cible."
+					"Il faut calculer l'effet d'un clic à la distance de tir mentionnée dans l'énoncé"
+				)
+				mauvaise_reponse = pg.ShortAnswerQuestion.defaultAnswer(feedback_erreur)
+
+				# Création de la question
+				question = pg.ShortAnswerQuestion(id=0, title=titre,
+					text=texte,
+					answers=[bonne_reponse, mauvaise_reponse])
+
+				# Ajout de la question :
+				liste_questions.append(question)
+
+		return liste_questions
+
 
 if __name__ == "__main__":
 
@@ -384,14 +498,16 @@ if __name__ == "__main__":
 	# Création de la banque de questions
 	groupe = pg.QuestionGroup()
 
-	filename = "Conversions km - nautiques.txt"
+	filename = "Proportionnalité nombre de clics FAMAS"
 
-	groupe.path = pg.Path(pg.Parameters.test_category + filename)
+	category = "Fusilier marin (Fuse)/"
 
-	groupe.questions = ConversionNqKm.generer()
+	groupe.path = pg.Path(pg.Parameters.test_category + category + filename)
+
+	groupe.questions = ProportionnaliteFuseCorrection.generer()
 
 	parser = pg.Parser()
 
 	parser.addQuestionGroup(groupe)
 
-	parser.write(filepath=pg.Parameters.banque_test + filename)
+	parser.write(filepath=pg.Parameters.banque_test + filename + ".txt")
